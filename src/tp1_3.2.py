@@ -96,6 +96,53 @@ class Product:
         self.comments:list[Comment] = comments # n sei
 
     def _product_parser(self, product_info):
+        result = {}
+        
+        result["asin"] = product_info[1][6:].strip()
+        result["title"] = product_info[2][9:].strip()
+        result["salesrank"] = product_info[4][13:].strip()
+
+        elements = re.findall(r'\b\d+\b|\b\w{10}\b', product_info[5])
+        if(elements[0] != 0):
+            result["similar"] = elements[1:]
+        else:
+            result["similar"] = []
+        
+        number_categories = product_info[6][14:].strip()
+        categories = []
+        for i in range(int(number_categories)):
+            pattern = r'(\w[\w\s&]+)\[(\d+)\]'
+            matches = re.findall(pattern, product_info[7+i])
+            for items in matches:
+                categories.append({"name":items[0],"id":int(items[1])})
+
+        result["categories"] = categories
+
+        pattern = r'avg rating:\s*(\d+)'
+        review_download_avgrating_index = 6 + number_categories + 1
+        match = re.search(pattern, product_info[review_download_avgrating_index])
+        result["avg_rating"] = int(match.group(1))
+
+        comments = []
+
+        for customer_feedback in product_info[review_download_avgrating_index+1:]:
+            cst_fdbk = {}
+            pattern = r'(\d{4})-(\d{1,2})-(\d{1,2})\s+cutomer:\s+(\w+)\s+rating:\s+(\d+)\s+votes:\s+(\d+)\s+helpful:\s+(\d+)'
+            match = re.search(pattern, customer_feedback)
+            year, month, day = map(str, match.groups()[:3])  # Extract and convert date parts
+            customer = match.group(4)  # Customer ID
+            rating = int(match.group(5))  # Rating
+            votes = int(match.group(6))  # Number of votes
+            helpful = int(match.group(7))  # Helpfulness
+            cst_fdbk["date"] = year + "-" + month + "-" + day
+            cst_fdbk["customer"] = customer
+            cst_fdbk["rating"] = rating
+            cst_fdbk["votes"] = votes
+            cst_fdbk["helpful"] = helpful
+            comments.append(cst_fdbk)
+
+        result["comments"] = comments
+
         """
         This function takes the product_info which is lines from the file and extracts all atributes needed
 
@@ -122,7 +169,9 @@ class Product:
                   {'date':date(2003, 12, 14), 'customer':'A2VE83MZF98ITY', 'rating':5, 'votes':6, 'helpful':5}]
         
         """
-        pass
+
+        print(result)
+        return result
 
 def input_file_reader(file_path:str):
     try:
@@ -177,4 +226,4 @@ def input_file_reader(file_path:str):
     except Exception as e:
         print(e)
 
-input_file_reader("data\\amazon-meta.txt")
+input_file_reader("amazon-meta.txt")
