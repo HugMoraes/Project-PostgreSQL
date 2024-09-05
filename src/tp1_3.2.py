@@ -169,8 +169,7 @@ class Product:
                   {'date':date(2003, 12, 14), 'customer':'A2VE83MZF98ITY', 'rating':5, 'votes':6, 'helpful':5}]
         
         """
-
-        print(result)
+        
         return result
 
 def input_file_reader(file_path:str):
