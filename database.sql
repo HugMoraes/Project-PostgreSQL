@@ -1,49 +1,52 @@
 CREATE TABLE Product(
-  ASIN BIGINT PRIMARY KEY,
-  Id INTEGER UNIQUE NOT NULL,
-  Title VARCHAR(500),
-  ProductGroup VARCHAR(50),
-  Salesrank INTEGER,
-  AvgRating INTEGER
+  asin VARCHAR(10) PRIMARY KEY UNIQUE,
+  id INTEGER,
+  title VARCHAR(500),
+  product_group VARCHAR(50),
+  salesrank INTEGER,
+  review_total INTEGER,
+  review_avg DECIMAL(),
+  review_downloaded INTEGER
+
 );
 
 CREATE TABLE Category(
-  Id INTEGER PRIMARY KEY,
-  Super_Id INTEGER,
-  Name VARCHAR(50),
+  category_id INTEGER PRIMARY KEY,
+  super_id INTEGER,
+  name VARCHAR(100),
   
-  FOREIGN KEY(Super_Id) REFERENCES Category(Id)
+  FOREIGN KEY(super_id) REFERENCES Category(category_id)
 );
 
 CREATE TABLE ProductCategory(
-  Product_ASIN BIGINT,
-  Category_Id INTEGER,
+  product_asin VARCHAR(10),
+  category_id INTEGER,
   
-  PRIMARY KEY(Product_ASIN, Category_Id),
+  PRIMARY KEY(product_asin, category_id),
   
-  FOREIGN KEY(Category_Id) REFERENCES Category(Id),
-  FOREIGN KEY(Product_ASIN) REFERENCES Product(ASIN)
+  FOREIGN KEY(category_id) REFERENCES Category(category_id),
+  FOREIGN KEY(product_asin) REFERENCES Product(asin)
 );
 
 CREATE TABLE SimilarProduct(
-  Product_ASIN BIGINT,
-  Similar_ASIN BIGINT,
+  product_asin VARCHAR(10),
+  similar_asin VARCHAR(10),
   
-  PRIMARY KEY(Product_ASIN, Similar_ASIN),
+  PRIMARY KEY(product_asin, similar_asin),
   
-  FOREIGN KEY(Product_ASIN) REFERENCES Product(ASIN),
-  FOREIGN KEY(Similar_ASIN) REFERENCES Product(ASIN)
+  FOREIGN KEY(product_asin) REFERENCES Product(asin),
 );
 
 CREATE TABLE Review(
-  Customer VARCHAR(50),
-  Product_ASIN BIGINT,
-  ReviewDate DATE,
-  Rating INTEGER,
-  Votes INTEGER,
-  Helpful INTEGER,
+  customer_id VARCHAR(50),
+  product_asin VARCHAR(10),
+  review_id SERIAL,
+  review_date DATE,
+  rating INTEGER,
+  votes INTEGER,
+  helpful INTEGER,
   
-  PRIMARY KEY(Customer, Product_ASIN),
+  PRIMARY KEY(product_asin, review_id),
   
-  FOREIGN KEY(Product_ASIN) REFERENCES Product(ASIN)
+  FOREIGN KEY(product_asin) REFERENCES Product(asin)
 );
