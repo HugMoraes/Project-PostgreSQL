@@ -3,6 +3,32 @@ class Product:
 
     def _product_parser(self, product_info):
         result = {}
+
+        id_match = re.search(r'Id:\s*(\d+)', product_info[0])
+        product_id = id_match.group(1)
+
+        asin_match = re.search(r'ASIN:\s*(\d+)', product_info[1])
+        product_asin = asin_match.group(1)
+
+        title_match = re.search(r'title:\s*(.*)', product_info[2])
+        product_title = title_match.group(1)
+
+        group_match = re.search(r'group:\s*(.*)', product_info[3])
+        product_group = group_match.group(1)
+
+        salesrank_match = re.search(r'salesrank:\s*(\d+)', input[4])
+        product_salesrank = salesrank_match.group(1)
+
+        total_review_match = re.search(r'reviews:\s*total:\s*(\d+)', product_info[9])
+        total_review = total_review_match.group(1)
+
+        review_download_match = re.search(r'downloaded:\s*(\d+)', product_info[9])
+        review_download = review_download_match.group(1)
+
+        avg_rating_match = re.search(r'avg rating:\s*(\d+)', product_info[9])
+        avg_rating = avg_rating_match.group(1)
+
+        produto = Product(product_id, product_asin, product_title, product_group, product_salesrank, total_review, review_download, avg_rating)
         
         result["asin"] = product_info[1][6:].strip()
         result["title"] = product_info[2][9:].strip()
