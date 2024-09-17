@@ -9,16 +9,6 @@ class Product():
         self.review_downloaded = review_downloaded
         self.review_avg = review_avg
 
-    def to_str(self):
-        print(f"product_id = {self.product_id}")
-        print(f"asin = {self.asin}")
-        print(f"title = {self.title}")
-        print(f"product_group = {self.product_group}")
-        print(f"salesrank = {self.salesrank}")
-        print(f"review_total = {self.review_total}")
-        print(f"review_downloaded = {self.review_downloaded}")
-        print(f"review_avg = {self.review_avg}")
-
 class Category():
     def __init__(self, category_id: int, name: str, parent_id: int = None):
         self.category_id = category_id
@@ -36,7 +26,7 @@ class SimilarProduct():
         self.similar_asin = similar_asin
 
 class Review():
-    def __init__(self, product_id: int, customer_id: str, review_date: str, rating: int=None, votes: int=None, helpful: int=None):
+    def __init__(self, product_id: int, customer_id: str =None, review_date: str =None, rating: int=None, votes: int=None, helpful: int=None):
         self.product_id = product_id
         self.customer_id = customer_id
         self.review_date = review_date
