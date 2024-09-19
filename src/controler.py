@@ -1,4 +1,7 @@
 import re
+import psycopg2
+from psycopg2.extras import execute_values
+from configparser import ConfigParser
 from src.model import Product, Category, ProductCategory, SimilarProduct, Review
 
 class DatasetController:
@@ -25,7 +28,6 @@ class DatasetController:
                 if line == '\n':    
                     # Extract objects from the product info block and store
                     product_obj, categories_objs, products_category_objs, similars_objs, reviews_objs = DatasetController._extract_objs(product_block_lines)
-
                     product_list.append(product_obj)
                     category_dict.update(categories_objs)
                     prod_category_list.extend(products_category_objs)
@@ -42,7 +44,7 @@ class DatasetController:
 
         #print()
 
-        return product_list, category_dict, prod_category_list, similars_list, reviews_list
+        return product_list, list(category_dict.values()), prod_category_list, similars_list, reviews_list
 
     def _extract_objs(block):
         # If the product is descontinued it will have only 3 lines
@@ -125,18 +127,104 @@ class DatasetController:
 class DatabaseController:
     def insert_one():
         pass
-    def insert_batch():
-        pass
+    def insert_many(data):
+        amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
+        conn = DatabaseController.getConnection(amazondb_config)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        insert_query = """
+            INSERT INTO your_table (column1, column2, column3)
+            VALUES %s
+        """
+        execute_values(cursor, insert_query, data)
+        cursor.close()
+        conn.close()
+
+    @classmethod
+    def getConnection(cls, config):
+        # Connect to the PostgreSQL database server
+        try:
+            with psycopg2.connect(**config) as conn:
+                print('Connected to the PostgreSQL server.')
+                return conn
+        except (psycopg2.DatabaseError, Exception) as error:
+            print(error)
+    
+    @classmethod
+    def getConfiguration(cls, filename, section):
+        parser = ConfigParser()
+        parser.read(filename)
+        config = {}
+        if parser.has_section(section):
+            params = parser.items(section)
+            for param in params:
+                config[param[0]] = param[1]
+        else:
+            raise Exception('Section {0} not found in the {1} file'.format(section, filename))
+        return config
+    
+    @classmethod
+    def createDatabase(cls):
+        init_config = DatabaseController.getConfiguration("database.ini", "postgresql")
+        conn = DatabaseController.getConnection(init_config)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        try:
+            cursor.execute(f"CREATE DATABASE amazondb")
+            print("Database was created!")
+        except Exception as error:
+            print(f"Something went wrong: {error}")
+        cursor.close()
+        conn.close()
+    
+    @classmethod
+    def createTables(cls, sqlTablesFileName):
+        with open(sqlTablesFileName, "r") as f:
+            sqlTables = f.readlines()
+            sqlTables = ''.join(sqlTables)
+        try:
+            DatabaseController.executeQuery(sqlTables)
+            print("Tables succesfully created!")
+        except Exception as error:
+            print(f"Something went wrong: {error}")
+        f.close()
+    
+    @classmethod
+    def getRows(cls, query):
+        amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
+        conn = DatabaseController.getConnection(amazondb_config)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return rows
+    
+    @classmethod
+    def executeQuery(cls, query):
+        amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
+        conn = DatabaseController.getConnection(amazondb_config)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        cursor.execute(query)
+        cursor.close()
+        conn.close()
 
 class ProductDAO(DatabaseController):
-    pass
+    def insert_many(obj_list):
+        return super().insert_many([obj.to_tuple() for obj in obj_list])
 class CategoryDAO(DatabaseController):
-    pass
+    def insert_many(obj_list):
+        return super().insert_many([obj.to_tuple() for obj in obj_list])
 class ProductCategoryDAO(DatabaseController):
-    pass
+    def insert_many(obj_list):
+        return super().insert_many([obj.to_tuple() for obj in obj_list])
 class SimilarProductDAO(DatabaseController):
-    pass
+    def insert_many(obj_list):
+        return super().insert_many([obj.to_tuple() for obj in obj_list])
 class ReviewDAO(DatabaseController):
-    pass
+    def insert_many(obj_list):
+        return super().insert_many([obj.to_tuple() for obj in obj_list])
 
         
