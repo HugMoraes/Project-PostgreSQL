@@ -58,7 +58,7 @@ class DatasetController:
 
         # If the block contains only 3 lines it means that is discontinued product
         if len(block) == 3:
-            return (product, {}, [], [], [])
+            return (product, {}, {}, [], [])
 
         # Extract easy information
         product.title = block[2][8:].strip()
@@ -115,7 +115,7 @@ class DatasetController:
             
             for review_line in block:
                 review_info = review_regex.search(review_line.strip()).groups()
-                review = Review(product.product_id, review_info[1], review_info[0])
+                review = Review(product.asin, review_info[1], review_info[0])
                 review.rating = int(review_info[2])
                 review.votes = int(review_info[3])
                 review.helpful = int(review_info[4])
