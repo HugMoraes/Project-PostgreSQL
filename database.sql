@@ -5,7 +5,7 @@ CREATE TABLE Product(
   product_group VARCHAR(50),
   salesrank INTEGER,
   review_total INTEGER,
-  review_avg DECIMAL(),
+  review_avg DECIMAL(10, 2),
   review_downloaded INTEGER
 
 );
@@ -34,7 +34,7 @@ CREATE TABLE SimilarProduct(
   
   PRIMARY KEY(product_asin, similar_asin),
   
-  FOREIGN KEY(product_asin) REFERENCES Product(asin),
+  FOREIGN KEY(product_asin) REFERENCES Product(asin)
 );
 
 CREATE TABLE Review(
