@@ -127,13 +127,14 @@ class DatasetController:
 class DatabaseController:
     def insert_one():
         pass
-    def insert_many(data):
+    @classmethod
+    def insert_many(cls, table_name, data):
         amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
         conn = DatabaseController.getConnection(amazondb_config)
         conn.autocommit = True
         cursor = conn.cursor()
-        insert_query = """
-            INSERT INTO your_table (column1, column2, column3)
+        insert_query = f"""
+            INSERT INTO {table_name} (column1, column2, column3)
             VALUES %s
         """
         execute_values(cursor, insert_query, data)
@@ -212,19 +213,34 @@ class DatabaseController:
         conn.close()
 
 class ProductDAO(DatabaseController):
-    def insert_many(obj_list):
-        return super().insert_many([obj.to_tuple() for obj in obj_list])
+    TABLE_NAME = "Product"
+
+    @classmethod
+    def insert_many(cls, obj_list):
+        return super().insert_many(cls.TABLE_NAME, [obj.to_tuple() for obj in obj_list])
 class CategoryDAO(DatabaseController):
-    def insert_many(obj_list):
-        return super().insert_many([obj.to_tuple() for obj in obj_list])
+    TABLE_NAME = "Category"
+
+    @classmethod
+    def insert_many(cls, obj_list):
+        return super().insert_many(cls.TABLE_NAME, [obj.to_tuple() for obj in obj_list])
 class ProductCategoryDAO(DatabaseController):
-    def insert_many(obj_list):
-        return super().insert_many([obj.to_tuple() for obj in obj_list])
+    TABLE_NAME = "ProductCategory"
+    
+    @classmethod
+    def insert_many(cls, obj_list):
+        return super().insert_many(cls.TABLE_NAME, [obj.to_tuple() for obj in obj_list])
 class SimilarProductDAO(DatabaseController):
-    def insert_many(obj_list):
-        return super().insert_many([obj.to_tuple() for obj in obj_list])
+    TABLE_NAME = "SimilarProduct"
+
+    @classmethod
+    def insert_many(cls, obj_list):
+        return super().insert_many(cls.TABLE_NAME, [obj.to_tuple() for obj in obj_list])
 class ReviewDAO(DatabaseController):
-    def insert_many(obj_list):
-        return super().insert_many([obj.to_tuple() for obj in obj_list])
+    TABLE_NAME = "Review"
+
+    @classmethod
+    def insert_many(cls, obj_list):
+        return super().insert_many(cls.TABLE_NAME, [obj.to_tuple() for obj in obj_list])
 
         
