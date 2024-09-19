@@ -1,6 +1,6 @@
 CREATE TABLE Product(
-  id INTEGER,
-  asin VARCHAR(10) PRIMARY KEY UNIQUE,
+  id INTEGER UNIQUE NOT NULL,
+  asin VARCHAR(10) PRIMARY KEY,
   title VARCHAR(500),
   product_group VARCHAR(50),
   salesrank INTEGER,
@@ -44,9 +44,7 @@ CREATE TABLE Review(
   rating INTEGER,
   votes INTEGER,
   helpful INTEGER,
-  review_id SERIAL,
-  
-  PRIMARY KEY(product_asin, review_id),
+  review_id SERIAL PRIMARY KEY,
   
   FOREIGN KEY(product_asin) REFERENCES Product(asin)
 );
