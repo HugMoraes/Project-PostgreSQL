@@ -17,7 +17,7 @@ def main():
     SimilarProductDAO.insert_many(similars_list)
     ReviewDAO.insert_many(reviews_list)
 
-    print(DatabaseController.getRows("SELECT * FROM PRODUCTS")[:30])
+    print(DatabaseController.getRows("SELECT * FROM Product")[:30])
     print(f'Tempo execução = {datetime.now() - start_time}')
 
 if __name__ == "__main__":
