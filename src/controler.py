@@ -11,7 +11,7 @@ class DatasetController:
 
         product_list = []
         category_dict = dict()
-        prod_category_list = []
+        prod_category_dict = dict()
         similars_list = []
         reviews_list = []
 
@@ -30,7 +30,7 @@ class DatasetController:
                     product_obj, categories_objs, products_category_objs, similars_objs, reviews_objs = DatasetController._extract_objs(product_block_lines)
                     product_list.append(product_obj)
                     category_dict.update(categories_objs)
-                    prod_category_list.extend(products_category_objs)
+                    prod_category_dict.update(products_category_objs)
                     similars_list.extend(similars_objs)
                     reviews_list.extend(reviews_objs)
 
@@ -44,13 +44,13 @@ class DatasetController:
 
         #print()
 
-        return product_list, list(category_dict.values()), prod_category_list, similars_list, reviews_list
+        return product_list, list(category_dict.values()), list(prod_category_dict.values()), similars_list, reviews_list
 
     def _extract_objs(block):
         # If the product is descontinued it will have only 3 lines
 
         categories_dict = {}
-        products_category_list = []
+        products_category_dict = {}
         similars_list = []
         reviews_list = []
 
@@ -92,7 +92,7 @@ class DatasetController:
                     category_name = category_info[0] 
                     category_id = category_info[1]
                     
-                    products_category_list.append(ProductCategory(product.asin, category_id))
+                    products_category_dict[product.product_id] = ProductCategory(product.asin, category_id)
                     categories_dict[category_id] = Category(category_id, category_name, parent_id)
                     parent_id = category_id
         else:
@@ -121,7 +121,7 @@ class DatasetController:
                 review.helpful = int(review_info[4])
                 reviews_list.append(review)
 
-        return (product, categories_dict, products_category_list, similars_list, reviews_list)
+        return (product, categories_dict, products_category_dict, similars_list, reviews_list)
         
                 
 class DatabaseController:
