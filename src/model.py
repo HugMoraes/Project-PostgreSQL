@@ -22,8 +22,8 @@ class Category():
         return tuple(self.__dict__.values())
 
 class ProductCategory():
-    def __init__(self, product_id: int, category_id: int):
-        self.product_id = product_id
+    def __init__(self, product_asin: str, category_id: int):
+        self.product_asin = product_asin
         self.category_id = category_id
 
     def to_tuple(self):
@@ -39,8 +39,8 @@ class SimilarProduct():
 
 class Review():
     def __init__(self, product_id: int, customer_id: str =None, review_date: str =None, rating: int=None, votes: int=None, helpful: int=None):
-        self.product_id = product_id
         self.customer_id = customer_id
+        self.product_id = product_id
         self.review_date = review_date
         self.rating = rating
         self.votes = votes

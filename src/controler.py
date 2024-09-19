@@ -134,7 +134,7 @@ class DatabaseController:
         conn.autocommit = True
         cursor = conn.cursor()
         insert_query = f"""
-            INSERT INTO {table_name} (column1, column2, column3)
+            INSERT INTO {table_name}
             VALUES %s
         """
         execute_values(cursor, insert_query, data)
