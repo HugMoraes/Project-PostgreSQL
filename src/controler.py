@@ -3,6 +3,7 @@ import psycopg2
 from psycopg2.extras import execute_values
 from configparser import ConfigParser
 from src.model import Product, Category, ProductCategory, SimilarProduct, Review
+from tabulate import tabulate
 
 class DatasetController:
 
@@ -125,8 +126,6 @@ class DatasetController:
         
                 
 class DatabaseController:
-    def insert_one():
-        pass
     @classmethod
     def insert_many(cls, table_name, data):
         amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
@@ -212,6 +211,21 @@ class DatabaseController:
         cursor.close()
         conn.close()
 
+    @classmethod
+    def print_table(cls, headers, matrix):
+        """
+        Print a table with given headers and matrix of values.
+
+        :param headers: List of column headers.
+        :param matrix: List of lists, where each inner list represents a row of values.
+        """
+        # Create the table
+        table = tabulate(matrix, headers=headers, tablefmt='grid')
+        
+        # Print the table
+        print(table)
+
+
 class ProductDAO(DatabaseController):
     TABLE_NAME = "Product"
 
@@ -243,4 +257,4 @@ class ReviewDAO(DatabaseController):
     def insert_many(cls, obj_list):
         return super().insert_many(cls.TABLE_NAME, [obj.to_tuple() for obj in obj_list])
 
-        
+           
