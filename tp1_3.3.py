@@ -1,27 +1,9 @@
 import os
-from tabulate import tabulate
-
-def execute_query():
-    pass
-
-def print_table(headers, matrix):
-    """
-    Print a table with given headers and matrix of values.
-
-    :param headers: List of column headers.
-    :param matrix: List of lists, where each inner list represents a row of values.
-    """
-    # Create the table
-    table = tabulate(matrix, headers=headers, tablefmt='grid')
-    
-    # Print the table
-    print(table)
-
-
+from src.controler import DatabaseController
 
 if __name__ == '__main__':
     while True:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        #os.system('cls' if os.name == 'nt' else 'clear')
         print('(a) Dado um produto, listar os 5 comentários mais úteis e com maior avaliação e os 5 comentários mais úteis e com menor avaliação')
         print('(b) Dado um produto, listar os produtos similares com maiores vendas do que ele')
         print('(c) Dado um produto, mostrar a evolução diária das médias de avaliação ao longo do intervalo de tempo coberto no arquivo de entrada')
@@ -37,58 +19,121 @@ if __name__ == '__main__':
             break
 
         elif op == 'a':
-            product = input(' - Please enter the product ASIN: ')
+            product_asin = input(' - Please enter the product ASIN: ')
+            query = f"""
+                    (
+                    SELECT r.*, 'Maior Avaliação' AS tipo
+                    FROM Review r
+                    WHERE r.product_asin = '{product_asin}'
+                    ORDER BY r.rating DESC, r.helpful DESC
+                    LIMIT 5
+                    )
+                    UNION ALL
+                    (
+                    SELECT r.*, 'Menor Avaliação' AS tipo
+                    FROM Review r
+                    WHERE r.product_asin = '{product_asin}'
+                    ORDER BY r.rating ASC, r.helpful DESC
+                    LIMIT 5
+                    );
+                    """
             print()
-
-            print('The best comments:')
-            # rows = execute_query()
-            rows = [['1/1/1', '123', 2, 1, 1], ['2/2/2', '456', 2, 1, 1]]
-            print_table(['Date', 'Customer', 'Rating', 'Votes', 'Helpful'], rows)
-                
-            print('\nThe worst comments:')
-            # rows = execute_query()
-            rows = [['1/1/1', '123', 2, 1, 1], ['2/2/2', '456', 2, 1, 1]]
-            print_table(['Date', 'Customer', 'Rating', 'Votes', 'Helpful'], rows)
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Customer ID', 'Product ASIN', 'Review Date', 'Rating', 'Votes', 'Helpful', 'Review ID', 'Tipo'], rows)
         
         elif op == 'b':
-            product = input(' - Please enter the product ASIN: ')
-            print()
-            
-            # rows = execute_query()
-            rows = [['123', 'abc', 'qwe', 1], ['456', 'abc', 'qwe', 2]]
-            print_table(['ASIN', 'Title', 'Group', 'Sales Rank'], rows)
+            product_asin = input(' - Please enter the product ASIN: ')
+            query = f"""
+                SELECT sp.similar_asin, p.title, p.salesrank
+                FROM SimilarProduct sp
+                JOIN Product p ON sp.similar_asin = p.asin
+                JOIN Product p_orig ON sp.product_asin = p_orig.asin
+                WHERE sp.product_asin = '{product_asin}'
+                AND p.salesrank < p_orig.salesrank;
+                """
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Similar ASIN', 'Title', 'Sales Rank'], rows)
             
         elif op == 'c':
-            product = input(' - Please enter the product ASIN: ')
+            product_asin = input(' - Please enter the product ASIN: ')
+            query = f"""
+                SELECT review_date, AVG(rating) AS avg_rating
+                FROM Review
+                WHERE product_asin = '{product_asin}'
+                GROUP BY review_date
+                ORDER BY review_date;
+                """
             print()
-            
-            # rows = execute_query()
-            rows = [['1/1/1', 1], ['2/2/2', 2]]
-            print_table(['Date', 'Average rating'], rows)
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Review Date', 'AVG Rating'], rows)
             
         elif op == 'd':
-            # rows = execute_query()
-            rows = [['123', 'abc', 'qwe', 1], ['456', 'abc', 'qwe', 2]]
-            print_table(['ASIN', 'Title', 'Group', 'Sales Rank'], rows)
+            query = f"""
+                SELECT product_group, asin, title, salesrank
+                FROM (
+                SELECT p.*, ROW_NUMBER() OVER (PARTITION BY product_group ORDER BY salesrank) AS rn
+                FROM Product p
+                ) sub
+                WHERE rn <= 10 AND salesrank > 0
+                ORDER BY product_group, rn;
+                """
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Product Group', 'ASIN', 'Title', 'Sales Rank'], rows)
             
         elif op == 'e':
-            # rows = execute_query()
-            rows = [['123', 'abc', 'qwe', 1, 3], ['456', 'abc', 'qwe', 2, 3]]
-            print_table(['ASIN', 'Title', 'Group', 'Sales Rank', 'Mean of positive reviews'], rows)
+            query = f"""
+                SELECT product_asin, AVG(CASE WHEN votes > 0 THEN helpful::FLOAT / votes ELSE 0 END) AS avg_helpfulness
+                FROM Review
+                WHERE rating >= 4
+                GROUP BY product_asin
+                ORDER BY avg_helpfulness DESC
+                LIMIT 10;
+                """            
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Product ASIN', 'AVG Helpfulness'], rows)
             
         elif op == 'f':
-            # rows = execute_query()
-            rows = [['abc', 3], ['qwe', 2]]
-            print_table(['Category', 'Mean of positive reviews'], rows)
+            query = f"""
+                WITH avg_helpfulness_per_product AS (
+                SELECT product_asin, AVG(CASE WHEN votes > 0 THEN helpful::FLOAT / votes ELSE 0 END) AS avg_helpfulness
+                FROM Review
+                WHERE rating >= 4
+                GROUP BY product_asin
+                ),
+                product_categories AS (
+                SELECT pc.product_asin, c.category_id, c.name AS category_name
+                FROM ProductCategory pc
+                JOIN Category c ON pc.category_id = c.category_id
+                )
+                SELECT pc.category_id, pc.category_name, AVG(ah.avg_helpfulness) AS category_avg_helpfulness
+                FROM product_categories pc
+                JOIN avg_helpfulness_per_product ah ON pc.product_asin = ah.product_asin
+                GROUP BY pc.category_id, pc.category_name
+                ORDER BY category_avg_helpfulness DESC
+                LIMIT 5;
+                """
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Category ID', 'Category Name', 'AVG Helpfulness Category'], rows)
             
         elif op == 'g':
-            # rows = execute_query()
-            rows = [['abc', '123', 3], ['qwe', '456', 2]]
-            print_table(['Group', 'Customer', 'Number of comments'], rows)
+            query = f"""
+                SELECT product_group, customer_id, num_reviews
+                FROM (
+                SELECT product_group, customer_id, COUNT(*) AS num_reviews,
+                        ROW_NUMBER() OVER (PARTITION BY product_group ORDER BY COUNT(*) DESC) AS rn
+                FROM Review r
+                JOIN Product p ON r.product_asin = p.asin
+                GROUP BY product_group, customer_id
+                ) sub
+                WHERE rn <= 10
+                ORDER BY product_group, num_reviews DESC;
+                """
+            rows = DatabaseController.getRows(query)
+            DatabaseController.print_table(['Product Group', 'Customer ID', 'Number of Reviews'], rows)
         
         else:
             print('Invalid input.')
         
 
 
-        os.system('pause')
+        #os.system('pause')
