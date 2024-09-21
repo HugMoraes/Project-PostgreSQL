@@ -7,4 +7,6 @@ Instale o tabulate para visualizar os resultados das querys com o comando abaixo
 pip install tabulate
 ```
 
-Adicionalmente, configure a senha do postgres para 123
+Adicionalmente, configure a senha do postgres para 123.
+
+Por fim, adicione o arquivo da amazon na pasta data.
