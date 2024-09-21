@@ -37,13 +37,10 @@ class DatasetController:
 
                     # After extracting reset the product block
                     product_block_lines = []
-                    #print(f'Readen Products = {len(product_list)}', end='\r')
                     continue
 
                 # If the current line is not the end of a block, add the line to the product block
                 product_block_lines.append(line)
-
-        #print()
 
         return product_list, list(category_dict.values()), list(prod_category_dict.values()), similars_list, reviews_list
 
@@ -126,9 +123,11 @@ class DatasetController:
         
                 
 class DatabaseController:
+    amazondb_session = './config/amazondb.ini'
+
     @classmethod
     def insert_many(cls, table_name, data):
-        amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
+        amazondb_config = DatabaseController.getConfiguration(cls.amazondb_session, "amazondb")
         conn = DatabaseController.getConnection(amazondb_config)
         conn.autocommit = True
         cursor = conn.cursor()
@@ -139,6 +138,7 @@ class DatabaseController:
         execute_values(cursor, insert_query, data)
         cursor.close()
         conn.close()
+        print(f"Inserted tuples in {table_name} successfully!")
 
     @classmethod
     def getConnection(cls, config):
@@ -164,8 +164,8 @@ class DatabaseController:
         return config
     
     @classmethod
-    def createDatabase(cls):
-        init_config = DatabaseController.getConfiguration("database.ini", "postgresql")
+    def createDatabase(cls, database_first_session):
+        init_config = DatabaseController.getConfiguration(database_first_session, "postgresql")
         conn = DatabaseController.getConnection(init_config)
         conn.autocommit = True
         cursor = conn.cursor()
@@ -191,7 +191,7 @@ class DatabaseController:
     
     @classmethod
     def getRows(cls, query):
-        amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
+        amazondb_config = DatabaseController.getConfiguration(cls.amazondb_session, "amazondb")
         conn = DatabaseController.getConnection(amazondb_config)
         conn.autocommit = True
         cursor = conn.cursor()
@@ -203,7 +203,7 @@ class DatabaseController:
     
     @classmethod
     def executeQuery(cls, query):
-        amazondb_config = DatabaseController.getConfiguration("amazondb.ini", "amazondb")
+        amazondb_config = DatabaseController.getConfiguration(cls.amazondb_session, "amazondb")
         conn = DatabaseController.getConnection(amazondb_config)
         conn.autocommit = True
         cursor = conn.cursor()

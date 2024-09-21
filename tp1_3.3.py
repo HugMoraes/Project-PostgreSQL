@@ -3,7 +3,6 @@ from src.controler import DatabaseController
 
 if __name__ == '__main__':
     while True:
-        #os.system('cls' if os.name == 'nt' else 'clear')
         print('(a) Dado um produto, listar os 5 comentários mais úteis e com maior avaliação e os 5 comentários mais úteis e com menor avaliação')
         print('(b) Dado um produto, listar os produtos similares com maiores vendas do que ele')
         print('(c) Dado um produto, mostrar a evolução diária das médias de avaliação ao longo do intervalo de tempo coberto no arquivo de entrada')
@@ -135,5 +134,3 @@ if __name__ == '__main__':
             print('Invalid input.')
         
 
-
-        #os.system('pause')
