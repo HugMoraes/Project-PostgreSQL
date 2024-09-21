@@ -1,7 +1,7 @@
 Postgresql link:
 https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
 
-Instale o tabulate com o comando abaixo!
+Instale o tabulate para visualizar os resultados das querys com o comando abaixo!
 
 ```console
 pip install tabulate
